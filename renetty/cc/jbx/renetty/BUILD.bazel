@@ -3,12 +3,13 @@ java_library (
     srcs = glob(['*.java']),
     deps = [
         '@maven//:io_projectreactor_netty_reactor_netty',
+        '@maven//:io_projectreactor_reactor_core',
     ]
 )
 
 java_binary(
-    name = 'renetty',
-    main_class = 'cc.jbx.renetty.App',
+    name = 'server',
+    main_class = 'cc.jbx.renetty.Server',
     runtime_deps = [
         ':lib',
     ]
