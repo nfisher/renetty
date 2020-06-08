@@ -16,8 +16,11 @@ load("@rules_jvm_external//:defs.bzl", "maven_install")
 load("@rules_jvm_external//:specs.bzl", "maven")
 
 maven_install(
+    # If you update an artifact below run the following command to resolve the updated dependencies.
+    # bazel run @unpinned_maven//:pin
     artifacts = [
         maven.artifact("io.projectreactor.netty", "reactor-netty", "0.9.7.RELEASE"),
+        maven.artifact("org.eclipse.jetty.http2", "http2-client", "9.4.29.v20200521"),
         #maven.artifact("org.apache.hadoop", "hadoop-client", "2.7.3", exclusions = [ "org.slf4j:slf4j-log4j12" ]),
     ],
     repositories = [
