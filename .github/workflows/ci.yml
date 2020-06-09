@@ -38,10 +38,7 @@ jobs:
           ${{ runner.os }}-bazel-
 
     - name: Install Bazel
-      run: |
-        curl -fsSLO https://github.com/bazelbuild/bazel/releases/download/3.2.0/bazel-3.2.0-installer-linux-x86_64.sh
-        chmod 755 bazel-3.2.0-installer-linux-x86_64.sh
-        ./bazel-3.2.0-installer-linux-x86_64.sh --user
+      run: ./setup.sh
     
     - name: Bazel Build
       run: |
