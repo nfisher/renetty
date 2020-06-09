@@ -1,11 +1,10 @@
-package cc.jbx.renetty;
+package cc.jbx.renetty.client;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -18,7 +17,6 @@ import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.http.MetaData;
 import org.eclipse.jetty.http2.api.Session;
 import org.eclipse.jetty.http2.api.Stream;
-import org.eclipse.jetty.http2.api.server.ServerSessionListener;
 import org.eclipse.jetty.http2.client.HTTP2Client;
 import org.eclipse.jetty.http2.frames.DataFrame;
 import org.eclipse.jetty.http2.frames.HeadersFrame;
@@ -41,7 +39,7 @@ public class Client {
     client.start();
     client.connect(
         new InetSocketAddress("127.0.0.1", 8080),
-        new ServerSessionListener.Adapter(),
+        new Session.Listener.Adapter(),
         sessionPromise);
 
     Session session = sessionPromise.get(5, TimeUnit.SECONDS);
@@ -52,7 +50,8 @@ public class Client {
     HttpURI uri = new HttpURI("http://127.0.0.1:8080/");
     MetaData.Request request = new MetaData.Request("GET", uri, HttpVersion.HTTP_2, requestFields);
     HeadersFrame headersFrame = new HeadersFrame(request, null, false);
-    CountDownLatch latch = new CountDownLatch(1);
+    int calls = 10;
+    CountDownLatch latch = new CountDownLatch(calls);
     AtomicReference<String> ref = new AtomicReference<>();
 
     Stream.Listener responseListener =
@@ -60,10 +59,17 @@ public class Client {
           @Override
           public void onData(Stream stream, DataFrame frame, Callback callback) {
             logger.warning(frame.toString());
+
             callback.succeeded();
             ByteBuffer buf = frame.getData();
-            ref.set(UTF_8.decode(buf).toString());
-            latch.countDown();
+            String s = UTF_8.decode(buf).toString();
+            logger.info(s);
+            ref.set(s);
+
+            if (frame.isEndStream()) {
+              logger.warning("endStream");
+              latch.countDown();
+            }
           }
 
           @Override
@@ -72,16 +78,17 @@ public class Client {
           }
         };
 
+    for (int i = 0; i < calls; i++) {
+      FuturePromise<Stream> streamPromise = new FuturePromise<>();
+      session.newStream(headersFrame, streamPromise, responseListener);
 
-    FuturePromise<Stream> streamPromise = new FuturePromise<>();
-    session.newStream(headersFrame, streamPromise, responseListener);
-    Stream stream = streamPromise.get(5, TimeUnit.SECONDS);
-    ByteBuffer content = ByteBuffer.allocate(8);
-    DataFrame requestContent = new DataFrame(stream.getId(), content, true);
-    stream.data(requestContent, Callback.NOOP);
+      Stream stream = streamPromise.get(5, TimeUnit.SECONDS);
+      ByteBuffer content = UTF_8.encode("helo");
+      DataFrame requestContent = new DataFrame(stream.getId(), content, true);
+      stream.data(requestContent, Callback.NOOP);
+    }
     latch.await();
+    logger.info("<" + ref.get() + ">");
     client.stop();
-
-    logger.info(ref.get());
   }
 }

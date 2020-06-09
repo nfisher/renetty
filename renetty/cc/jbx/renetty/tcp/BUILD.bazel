@@ -1,0 +1,30 @@
+java_library(
+    name = "lib",
+    srcs = glob(['*.java']),
+    deps = [
+        "@maven//:io_projectreactor_netty_reactor_netty",
+        "@maven//:io_projectreactor_reactor_core",
+        "@maven//:io_netty_netty_buffer",
+        "@maven//:org_reactivestreams_reactive_streams",
+    ],
+    resources = [
+        'logger.properties',
+    ],
+    resource_strip_prefix = 'renetty/cc/jbx/renetty/tcp',
+)
+
+java_binary(
+    name = "server",
+    main_class = "cc.jbx.renetty.tcp.App",
+    runtime_deps = [
+        ":lib",
+    ],
+)
+
+java_binary(
+    name = "client",
+    main_class = "cc.jbx.renetty.tcp.Client",
+    runtime_deps = [
+        ":lib",
+    ],
+)

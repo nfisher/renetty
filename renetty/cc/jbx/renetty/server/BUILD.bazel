@@ -1,0 +1,25 @@
+java_library (
+    name = 'lib',
+    srcs = glob(['*.java']),
+    deps = [
+        '@maven//:javax_servlet_javax_servlet_api',
+        '@maven//:org_eclipse_jetty_jetty_http',
+        '@maven//:org_eclipse_jetty_jetty_server',
+        '@maven//:org_eclipse_jetty_jetty_servlet',
+        '@maven//:org_eclipse_jetty_jetty_util',
+        '@maven//:org_eclipse_jetty_http2_http2_common',
+        '@maven//:org_eclipse_jetty_http2_http2_server',
+    ],
+    resources = [
+        'logger.properties',
+    ],
+    resource_strip_prefix = 'renetty/cc/jbx/renetty/server',
+)
+
+java_binary(
+    name = 'server',
+    main_class = 'cc.jbx.renetty.server.AppServer',
+    runtime_deps = [
+        ':lib',
+    ],
+)
