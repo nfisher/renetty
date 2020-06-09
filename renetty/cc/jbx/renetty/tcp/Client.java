@@ -34,7 +34,7 @@ class Sender {
 public class Client {
 
   private static final Logger LOGGER = Logger.getLogger(Client.class.getCanonicalName());
-  private static final Sender sender = new Sender("foobar-");
+  private static final Sender sender = new Sender("foobar2-");
 
   public static void logResponse(ByteBuf byteBuf) {
     String s = UTF_8.decode(byteBuf.nioBuffer()).toString();
