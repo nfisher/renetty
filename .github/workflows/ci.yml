@@ -27,7 +27,7 @@ jobs:
       with:
         java-version: 1.8
 
-    - name: Cache
+    - name: Cache Bazel
       uses: actions/cache@v2
       with:
         path: |
@@ -36,6 +36,14 @@ jobs:
         key: ${{ runner.os }}-bazel-${{ hashFiles('**/.bazelversion') }}
         restore-keys: |
           ${{ runner.os }}-bazel-
+
+    - name: Cache bazel outputRoot
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/bazel
+        key: ${{ runner.os }}-bazel-outputRoot-${{ hashFiles('**/maven_install.json') }}
+        restore-keys: |
+            ${{ runner.os }}-bazel-outputRoot-
 
     - name: Install Bazel
       run: ./setup.sh
